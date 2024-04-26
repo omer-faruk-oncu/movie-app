@@ -1,12 +1,21 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../auth/firebase";
 import {
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
+  updateProfile,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { toastErrorNotify, toastSuccessNotify } from "../helpers/ToastNotify";
+import {
+  toastErrorNotify,
+  toastSuccessNotify,
+  toastWarnNotify,
+} from "../helpers/ToastNotify";
 
 const AuthContext = createContext();
 //* with custom hook
@@ -18,7 +27,11 @@ const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(false);
   const navigate = useNavigate();
 
-  const createUser = async (email, password) => {
+  useEffect(() => {
+    userObserver();
+  }, []);
+
+  const createUser = async (email, password, displayName) => {
     try {
       //? yeni bir kullanıcı oluşturmak için kullanılan firebase metodu
       const userCredential = await createUserWithEmailAndPassword(
@@ -26,6 +39,11 @@ const AuthProvider = ({ children }) => {
         email,
         password
       );
+
+      await updateProfile(auth.currentUser, {
+        displayName,
+      });
+
       navigate("/login");
       toastSuccessNotify("Registered successfully");
       console.log(userCredential);
@@ -56,7 +74,7 @@ const AuthProvider = ({ children }) => {
   const logOut = () => {
     signOut(auth)
       .then(() => {
-       toastSuccessNotify("Logged out successfully");
+        toastSuccessNotify("Logged out successfully");
         // Sign-out successful.
       })
       .catch((error) => {
@@ -64,7 +82,50 @@ const AuthProvider = ({ children }) => {
       });
   };
 
-  const values = { currentUser, createUser, signIn, logOut };
+  const userObserver = () => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        //console.log("logged in");
+        const { email, displayName, photoURL } = user;
+        setCurrentUser({ email, displayName, photoURL });
+      } else {
+        // console.log("logged out");
+        setCurrentUser(false);
+      }
+    });
+  };
+
+  const googleProvider = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        navigate("/");
+        toastSuccessNotify("Logged in successfully");
+      })
+      .catch((error) => {
+        toastErrorNotify(error.message);
+      });
+  };
+
+  const forgotPassword = (email) => {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        toastWarnNotify("Please check your mail box!");
+      })
+      .catch((error) => {
+        toastErrorNotify(error.message);
+      });
+  };
+
+  //console.log(currentUser);
+  const values = {
+    currentUser,
+    createUser,
+    signIn,
+    logOut,
+    googleProvider,
+    forgotPassword,
+  };
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
 };
