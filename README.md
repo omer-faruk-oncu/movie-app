@@ -1,4 +1,6 @@
 
+# ![movie](https://github.com/omer-faruk-oncu/movie-app/assets/154313389/a58c27a7-038f-4e2f-8ac5-2759ea5e602f)
+
 
 # https://movie-app-oncu.netlify.app
 
