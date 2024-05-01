@@ -1,6 +1,6 @@
 
-[
-](https://movie-app-oncu.netlify.app)
+
+# https://movie-app-oncu.netlify.app
 
 # Getting Started with Create React App
 
