@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 const Login = () => {
   //* birleştirilmiş state
   const [info, setInfo] = useState({
-    email: "",
-    password: "",
+    email: "admin@admin.com",
+    password: "Aa123456*",
   });
 
   const { signIn, googleProvider, forgotPassword } = useAuthContext();
@@ -37,6 +37,7 @@ const Login = () => {
                 type="email"
                 placeholder=" "
                 required
+                value={email}
                 onChange={handleChange}
               />
               <label htmlFor="floating_email">Email</label>
@@ -48,6 +49,7 @@ const Login = () => {
                 type="password"
                 placeholder=" "
                 required
+                value={password}
                 onChange={handleChange}
               />
               <label htmlFor="floating_password">Password</label>
